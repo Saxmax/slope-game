@@ -1,4 +1,6 @@
-extends Sprite2D
+class_name Player extends Node2D
+
+var sprite: Sprite2D;
 
 var start_position := Vector2(500, -50); #220
 var play_position := Vector2(358, 335);
@@ -16,7 +18,10 @@ var width := 0.0;
 var height := 0.0;
 
 func _ready() -> void:
-	var size = texture.get_size();
+	Game.instance.game_ready.connect(game_ready);
+	sprite = $PlayerTexture;
+
+	var size = sprite.texture.get_size();
 	var factor = scale.x;
 	width = size.x * factor;
 	height = size.y * factor;
@@ -66,8 +71,8 @@ func check_bounds() -> void:
 
 func update_player() -> void:
 	isChanged = false
-	self.flip_h = isDown
-	self.rotation_degrees = get_player_rotation()
+	sprite.flip_h = isDown
+	sprite.rotation_degrees = get_player_rotation()
 
 func get_player_rotation() -> int:
 	return SKI_ROTATION if isDown else -SKI_ROTATION

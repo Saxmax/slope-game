@@ -9,6 +9,8 @@ signal game_start
 signal game_end
 signal player_ready
 
+var player_prefab := preload("res://scenes/player.tscn");
+
 var play_button: PlayButton;
 var tree_spawner: TreeSpawner;
 var rendering_layer: Node2D;
@@ -20,6 +22,9 @@ func _ready() -> void:
 	rendering_layer = $RenderingLayer;
 
 	size = DisplayServer.window_get_size();
+
+	var player = player_prefab.instantiate() as Player;
+	rendering_layer.add_child(player);
 
 	game_ready.emit();
 
