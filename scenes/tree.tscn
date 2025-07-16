@@ -4,10 +4,10 @@
 [ext_resource type="Texture2D" uid="uid://dnqd8elh7ablg" path="res://assets/tree_snow.png" id="3_viusy"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_qd6xs"]
-size = Vector2(20, 70)
+size = Vector2(20, 105)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_brfkd"]
-size = Vector2(22, 40)
+size = Vector2(22, 28)
 
 [sub_resource type="Curve" id="Curve_viusy"]
 _data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
@@ -57,13 +57,13 @@ texture = ExtResource("3_viusy")
 [node name="SlalomArea" type="Area2D" parent="."]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="SlalomArea"]
-position = Vector2(0, -77)
+position = Vector2(0, -81.5)
 shape = SubResource("RectangleShape2D_qd6xs")
 
 [node name="TrunkArea" type="Area2D" parent="."]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="TrunkArea"]
-position = Vector2(0, -20)
+position = Vector2(0, -14)
 shape = SubResource("RectangleShape2D_brfkd")
 
 [node name="Particles" type="GPUParticles2D" parent="."]

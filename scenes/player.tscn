@@ -2,8 +2,8 @@
 
 [ext_resource type="Texture2D" uid="uid://ctruga8ule5hm" path="res://assets/penguin.png" id="1_g2els"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_g2els"]
-size = Vector2(34, 53)
+[sub_resource type="CircleShape2D" id="CircleShape2D_3vyb7"]
+radius = 19.0263
 
 [node name="Player" type="Node2D"]
 
@@ -15,5 +15,5 @@ texture = ExtResource("1_g2els")
 [node name="CollisionArea" type="Area2D" parent="."]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="CollisionArea"]
-position = Vector2(0, -1.5)
-shape = SubResource("RectangleShape2D_g2els")
+position = Vector2(0, 5)
+shape = SubResource("CircleShape2D_3vyb7")
