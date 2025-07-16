@@ -1,8 +1,7 @@
-[gd_scene load_steps=4 format=3 uid="uid://cagfgpx2351as"]
+[gd_scene load_steps=3 format=3 uid="uid://cagfgpx2351as"]
 
-[ext_resource type="Script" uid="uid://buomftmqgny5u" path="res://scripts/game.gd" id="1_jyhfs"]
-[ext_resource type="Script" uid="uid://oxb7rodx8wah" path="res://scripts/tree_spawner.gd" id="1_sugp2"]
-[ext_resource type="Script" uid="uid://ctakgmigfehma" path="res://scripts/play_button.gd" id="2_tbgi4"]
+[ext_resource type="Script" uid="uid://c4f8ealprpdug" path="res://scripts/slope.gd" id="1_jyhfs"]
+[ext_resource type="PackedScene" uid="uid://hm1lk8gmig8p" path="res://scenes/player.tscn" id="4_jyhfs"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_jyhfs")
@@ -36,18 +35,13 @@ grow_horizontal = 2
 grow_vertical = 2
 disabled = true
 text = "PLAY"
-script = ExtResource("2_tbgi4")
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2(360, 640)
 
 [node name="TreeSpawner" type="Node2D" parent="."]
-script = ExtResource("1_sugp2")
 
 [node name="RenderingLayer" type="Node2D" parent="."]
 y_sort_enabled = true
 
-[connection signal="game_ready" from="." to="TreeSpawner" method="game_ready"]
-[connection signal="player_ready" from="." to="UserInterface/PlayButton" method="setState" binds= [true]]
-[connection signal="play_button_pressed" from="UserInterface/PlayButton" to="." method="playGame"]
-[connection signal="pressed" from="UserInterface/PlayButton" to="UserInterface/PlayButton" method="playButtonPressed"]
+[node name="Player" parent="RenderingLayer" instance=ExtResource("4_jyhfs")]
