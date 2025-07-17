@@ -1,28 +1,23 @@
-[gd_scene load_steps=4 format=3 uid="uid://cagfgpx2351as"]
+[gd_scene load_steps=6 format=3 uid="uid://cagfgpx2351as"]
 
 [ext_resource type="Script" uid="uid://c4f8ealprpdug" path="res://scripts/slope.gd" id="1_jyhfs"]
+[ext_resource type="Shader" uid="uid://jvqaqdbfg3wc" path="res://scripts/scroll.gdshader" id="2_jyhfs"]
 [ext_resource type="Texture2D" uid="uid://bff0hx0mccdhd" path="res://assets/background_snow.png" id="2_sugp2"]
 [ext_resource type="PackedScene" uid="uid://hm1lk8gmig8p" path="res://scenes/player.tscn" id="4_jyhfs"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_tbgi4"]
+shader = ExtResource("2_jyhfs")
+shader_parameter/scrollY = 0.0
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_jyhfs")
 
-[node name="Background" type="Sprite2D" parent="."]
+[node name="Background" type="TextureRect" parent="."]
 texture_repeat = 2
-position = Vector2(359, 641)
+material = SubResource("ShaderMaterial_tbgi4")
+offset_right = 40.0
+offset_bottom = 40.0
 texture = ExtResource("2_sugp2")
-
-[node name="ColorRect" type="ColorRect" parent="."]
-visible = false
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_right = 720.0
-offset_bottom = 1280.0
-grow_horizontal = 2
-grow_vertical = 2
 
 [node name="UserInterface" type="CanvasLayer" parent="."]
 follow_viewport_enabled = true

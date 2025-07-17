@@ -4,6 +4,7 @@ class_name Slope extends Node2D
 const tree_prefab := preload("res://scenes/tree.tscn");
 
 # References
+var background: TextureRect;
 var play_button: Button;
 var tree_spawner: Node2D;
 var rendering_layer: Node2D;
@@ -25,6 +26,7 @@ const TREE_DATA_TEXTURE := "texture";
 const TREE_DATA_SNOW := "snow";
 const TREE_DATA_EMITTER := "emitter";
 const TREE_DATA_TWEEN := "tween";
+const BACKGROUND_SCROLL_PARAM = "scrollY";
 
 # Vectors
 const player_start_position := Vector2(500, -50);
@@ -63,6 +65,8 @@ var player_height := 0.0;
 var tree_width := 0.0;
 var tree_height := 0.0;
 var tree_reset_count := 0;
+var background_texture_height := 0;
+var background_scroll := 0.0;
 
 # Other
 var current_trees: Array[Dictionary] = [];
@@ -70,6 +74,7 @@ enum PlayButtonState { Hidden, Inactive, Active };
 
 # Primary callables
 func _ready() -> void:
+	background = $Background;
 	play_button = $UserInterface/PlayButton
 	tree_spawner = $TreeSpawner
 	rendering_layer = $RenderingLayer;
@@ -78,6 +83,7 @@ func _ready() -> void:
 	player_area = $RenderingLayer/Player/CollisionArea;
 
 	game_size = get_viewport().get_visible_rect().size;
+	background_texture_height = background.texture.get_height();
 
 	var player_size = player_sprite.texture.get_size();
 	var player_scale = player_sprite.scale.x;
@@ -90,7 +96,7 @@ func _ready() -> void:
 	setup_world();
 
 func _input(event: InputEvent) -> void:
-	if event is not InputEventScreenTouch or not is_game_started: return;
+	if event is not InputEventScreenTouch or not is_game_started or is_player_crashed: return;
 
 	if not has_pressed_once:
 		has_pressed_once = not event.pressed;
@@ -102,11 +108,13 @@ func _input(event: InputEvent) -> void:
 		set_player_direction(is_input_down);
 
 func _process(delta: float) -> void:
+
 	var should_process = is_game_started and not is_player_crashed and has_pressed_once;
 	var should_process_trees = animate_trees_round_start or should_process;
 
 	if should_process_trees:
 		update_trees(delta);
+		update_background(delta);
 
 	if not should_process: return;
 	update_player(delta);
@@ -122,6 +130,7 @@ func setup_world() -> void:
 	tree_reset_count = 0;
 	animate_trees_round_start = true;
 	has_pressed_once = false;
+	is_input_down = false;
 
 	# Wait for the animation to finish, then enable the PlayButton.
 	await get_tree().create_timer(player_tween_duration).timeout;
@@ -279,7 +288,7 @@ func check_player_bounds() -> void:
 
 func reset_player() -> void:
 	player.position = player_start_position;
-	player_sprite.rotation_degrees = -player_rotation;
+	set_player_direction(false);
 	player_sprite.visible = true;
 	is_player_crashed = false;
 
@@ -306,6 +315,13 @@ func animate_player_bounds() -> void:
 
 func animate_player_crash() -> void:
 	pass;
+
+# Background callables
+func update_background(delta: float) -> void:
+	var speed = tree_speed if not animate_trees_round_start else tree_animation_speed;
+	background_scroll += speed * delta;
+	background_scroll = fmod(background_scroll, background_texture_height);
+	background.material.set_shader_parameter(BACKGROUND_SCROLL_PARAM, background_scroll / background_texture_height);
 
 # PlayButton callables
 func set_playbutton_state(state: PlayButtonState) -> void:
