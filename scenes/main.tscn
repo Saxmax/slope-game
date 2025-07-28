@@ -1,9 +1,11 @@
-[gd_scene load_steps=6 format=3 uid="uid://cagfgpx2351as"]
+[gd_scene load_steps=8 format=3 uid="uid://cagfgpx2351as"]
 
 [ext_resource type="Script" uid="uid://c4f8ealprpdug" path="res://scripts/slope.gd" id="1_jyhfs"]
 [ext_resource type="Shader" uid="uid://jvqaqdbfg3wc" path="res://scripts/scroll.gdshader" id="2_jyhfs"]
 [ext_resource type="Texture2D" uid="uid://bff0hx0mccdhd" path="res://assets/background_snow.png" id="2_sugp2"]
 [ext_resource type="PackedScene" uid="uid://hm1lk8gmig8p" path="res://scenes/player.tscn" id="4_jyhfs"]
+[ext_resource type="Texture2D" uid="uid://cd6blh7vl8pjp" path="res://assets/ui/analogue/Rect-Light-Default@4x.png" id="5_tbgi4"]
+[ext_resource type="Texture2D" uid="uid://pqwsmsndtnp5" path="res://assets/ui/analogue/Square-Dark-Default@4x.png" id="6_tefeu"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_tbgi4"]
 shader = ExtResource("2_jyhfs")
@@ -12,6 +14,9 @@ shader_parameter/scrollY = 0.0
 [node name="Main" type="Node2D"]
 script = ExtResource("1_jyhfs")
 
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(360, 640)
+
 [node name="Background" type="TextureRect" parent="."]
 texture_repeat = 2
 material = SubResource("ShaderMaterial_tbgi4")
@@ -19,31 +24,151 @@ offset_right = 40.0
 offset_bottom = 40.0
 texture = ExtResource("2_sugp2")
 
-[node name="UserInterface" type="CanvasLayer" parent="."]
-follow_viewport_enabled = true
-
-[node name="PlayButton" type="Button" parent="UserInterface"]
-custom_minimum_size = Vector2(200, 75)
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -4.0
-offset_top = -4.0
-offset_right = 4.0
-offset_bottom = 4.0
-grow_horizontal = 2
-grow_vertical = 2
-disabled = true
-text = "PLAY"
-
-[node name="Camera2D" type="Camera2D" parent="."]
-position = Vector2(360, 640)
-
 [node name="TreeSpawner" type="Node2D" parent="."]
 
 [node name="RenderingLayer" type="Node2D" parent="."]
 y_sort_enabled = true
 
 [node name="Player" parent="RenderingLayer" instance=ExtResource("4_jyhfs")]
+
+[node name="UserInterface" type="CanvasLayer" parent="."]
+follow_viewport_enabled = true
+
+[node name="PlayButton" type="TextureButton" parent="UserInterface"]
+offset_left = 248.0
+offset_top = 941.0
+offset_right = 549.0
+offset_bottom = 1145.0
+scale = Vector2(0.75, 0.5)
+disabled = true
+texture_normal = ExtResource("5_tbgi4")
+
+[node name="PlayButtonText" type="RichTextLabel" parent="UserInterface/PlayButton"]
+modulate = Color(0.144063, 0.144063, 0.144063, 1)
+custom_minimum_size = Vector2(200, 150)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 50.0
+offset_top = 25.0
+offset_right = -51.0
+offset_bottom = -29.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+theme_override_font_sizes/normal_font_size = 64
+text = "PLAY"
+fit_content = true
+scroll_active = false
+horizontal_alignment = 1
+vertical_alignment = 1
+meta_underlined = false
+hint_underlined = false
+deselect_on_focus_loss_enabled = false
+drag_and_drop_selection_enabled = false
+
+[node name="ScoreCard" type="NinePatchRect" parent="UserInterface"]
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 120.0
+offset_bottom = 100.0
+texture = ExtResource("6_tefeu")
+patch_margin_left = 25
+patch_margin_top = 25
+patch_margin_right = 25
+patch_margin_bottom = 25
+
+[node name="ScoreText" type="RichTextLabel" parent="UserInterface/ScoreCard"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -40.0
+offset_top = -30.0
+offset_right = 40.0
+offset_bottom = 30.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/normal_font_size = 28
+text = "0"
+fit_content = true
+scroll_active = false
+horizontal_alignment = 1
+vertical_alignment = 1
+deselect_on_focus_loss_enabled = false
+drag_and_drop_selection_enabled = false
+
+[node name="ScoreCardPrevious" type="NinePatchRect" parent="UserInterface"]
+modulate = Color(1, 1, 1, 0.862745)
+offset_left = 191.0
+offset_top = 1113.0
+offset_right = 352.0
+offset_bottom = 1193.0
+texture = ExtResource("6_tefeu")
+patch_margin_left = 25
+patch_margin_top = 25
+patch_margin_right = 25
+patch_margin_bottom = 25
+
+[node name="ScoreTextPrevious" type="RichTextLabel" parent="UserInterface/ScoreCardPrevious"]
+modulate = Color(1, 1, 1, 0.862745)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -69.0
+offset_top = -47.5
+offset_right = 69.0
+offset_bottom = 47.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/normal_font_size = 22
+text = "Previous:
+0"
+fit_content = true
+scroll_active = false
+horizontal_alignment = 1
+vertical_alignment = 1
+deselect_on_focus_loss_enabled = false
+drag_and_drop_selection_enabled = false
+
+[node name="ScoreCardBest" type="NinePatchRect" parent="UserInterface"]
+modulate = Color(1, 1, 1, 0.862745)
+offset_left = 355.0
+offset_top = 1113.0
+offset_right = 516.0
+offset_bottom = 1193.0
+texture = ExtResource("6_tefeu")
+patch_margin_left = 25
+patch_margin_top = 25
+patch_margin_right = 25
+patch_margin_bottom = 25
+
+[node name="ScoreTextBest" type="RichTextLabel" parent="UserInterface/ScoreCardBest"]
+modulate = Color(1, 1, 1, 0.862745)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -69.0
+offset_top = -47.5
+offset_right = 69.0
+offset_bottom = 47.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/normal_font_size = 22
+text = "Best:
+0"
+fit_content = true
+scroll_active = false
+horizontal_alignment = 1
+vertical_alignment = 1
+deselect_on_focus_loss_enabled = false
+drag_and_drop_selection_enabled = false

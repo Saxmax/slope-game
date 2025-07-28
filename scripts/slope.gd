@@ -5,7 +5,13 @@ const tree_prefab := preload("res://scenes/tree.tscn");
 
 # References
 var background: TextureRect;
-var play_button: Button;
+var play_button: TextureButton;
+var score_card: NinePatchRect;
+var score_card_previous: NinePatchRect;
+var score_card_best: NinePatchRect;
+var score_text: RichTextLabel;
+var score_text_previous: RichTextLabel;
+var score_text_best: RichTextLabel;
 var tree_spawner: Node2D;
 var rendering_layer: Node2D;
 var player: Node2D;
@@ -27,6 +33,8 @@ const TREE_DATA_SNOW := "snow";
 const TREE_DATA_EMITTER := "emitter";
 const TREE_DATA_TWEEN := "tween";
 const BACKGROUND_SCROLL_PARAM = "scrollY";
+const SCORE_TEXT_PREVIOUS_PREFIX := "Previous:\n";
+const SCORE_TEXT_BEST_PREFIX := "Best:\n";
 
 # Vectors
 const player_start_position := Vector2(500, -50);
@@ -60,6 +68,12 @@ const tree_fell_duration := 1.0;
 const tree_fell_delay := 0.5;
 const initial_tree_count := 10;
 const additional_tree_count := 1;
+const button_alpha_disabled := 0.3;
+const button_alpha_enabled := 1.0;
+const score_text_alpha_disabled := 0.5;
+const score_text_alpha_enabled := 1.0;
+const score_slalom = 1;
+const score_slalom_multiplier_max = 20;
 var player_width := 0.0;
 var player_height := 0.0;
 var tree_width := 0.0;
@@ -67,15 +81,30 @@ var tree_height := 0.0;
 var tree_reset_count := 0;
 var background_texture_height := 0;
 var background_scroll := 0.0;
+var current_distance := 0.0;
+var score_distance := 0;
+var score_speed := 1.5; # How fast you accrue points from just travelling
+var score_added := 0; # Added via e.g slalom (even combos) or pickups
+var score_slalom_multiplier = 1;
+var score_total := 0; # All score combined
+var score_best := 0;
 
 # Other
 var current_trees: Array[Dictionary] = [];
 enum PlayButtonState { Hidden, Inactive, Active };
 
+# To sort
+
 # Primary callables
 func _ready() -> void:
 	background = $Background;
 	play_button = $UserInterface/PlayButton
+	score_card = $UserInterface/ScoreCard
+	score_text = $UserInterface/ScoreCard/ScoreText
+	score_card_previous = $UserInterface/ScoreCardPrevious
+	score_text_previous = $UserInterface/ScoreCardPrevious/ScoreTextPrevious
+	score_card_best = $UserInterface/ScoreCardBest
+	score_text_best = $UserInterface/ScoreCardBest/ScoreTextBest
 	tree_spawner = $TreeSpawner
 	rendering_layer = $RenderingLayer;
 	player = $RenderingLayer/Player;
@@ -99,8 +128,8 @@ func _input(event: InputEvent) -> void:
 	if event is not InputEventScreenTouch or not is_game_started or is_player_crashed: return;
 
 	if not has_pressed_once:
-		has_pressed_once = not event.pressed;
-		return;
+		has_pressed_once = event.pressed;
+		#return;
 
 	var prev = is_input_down;
 	is_input_down = event.pressed;
@@ -108,7 +137,6 @@ func _input(event: InputEvent) -> void:
 		set_player_direction(is_input_down);
 
 func _process(delta: float) -> void:
-
 	var should_process = is_game_started and not is_player_crashed and has_pressed_once;
 	var should_process_trees = animate_trees_round_start or should_process;
 
@@ -118,15 +146,19 @@ func _process(delta: float) -> void:
 
 	if not should_process: return;
 	update_player(delta);
+	update_distance(delta);
 
 # Game flow callables
 func setup_world() -> void:
 	set_playbutton_state(PlayButtonState.Inactive);
+	set_score_text_state(true);
 
+	reset_score();
 	create_trees(initial_tree_count);
 	reset_player();
 	animate_player_ready();
 
+	current_distance = 0.0;
 	tree_reset_count = 0;
 	animate_trees_round_start = true;
 	has_pressed_once = false;
@@ -140,6 +172,7 @@ func setup_world() -> void:
 func round_start() -> void:
 	if is_game_started: return;
 	is_game_started = true;
+	set_score_text_state(false);
 
 func round_end() -> void:
 	if not is_game_started: return;
@@ -147,9 +180,26 @@ func round_end() -> void:
 	player_sprite.visible = false;
 	clear_trees();
 
+	score_text_previous.text = SCORE_TEXT_PREVIOUS_PREFIX + str(score_total);
+	if score_total > score_best:
+		score_best = score_total;
+		score_text_best.text = SCORE_TEXT_BEST_PREFIX + str(score_best);
+
 	# here we can fade to black, before re-positioning things, and fading back in
-	await get_tree().create_timer(1).timeout;
+	await get_tree().create_timer(0.1).timeout;
 	setup_world();
+
+# Gameplay callables
+func update_distance(delta: float) -> void:
+	var distance = score_speed * delta;
+	current_distance += distance;
+	score_distance = round(current_distance);
+	update_score();
+
+func give_slalom_score() -> void:
+	var score = score_slalom * score_slalom_multiplier;
+	score_slalom_multiplier = mini(score_slalom_multiplier + 1, score_slalom_multiplier_max);
+	add_score(score);
 
 # Tree callables
 func create_trees(count: int):
@@ -215,6 +265,9 @@ func update_trees(delta: float) -> void:
 
 func shake_tree(tree_data: Dictionary, isCrash: bool) -> void:
 	is_player_crashed = isCrash;
+
+	if not isCrash:
+		give_slalom_score();
 
 	# Drop the snow cover
 	var snow = tree_data[TREE_DATA_SNOW];
@@ -316,6 +369,29 @@ func animate_player_bounds() -> void:
 func animate_player_crash() -> void:
 	pass;
 
+# Score callables
+func reset_score() -> void:
+	score_distance = 0;
+	score_added = 0;
+	score_slalom_multiplier = 1;
+	score_total = 0;
+	score_text.text = str(score_total);
+
+func add_score(score: int) -> void:
+	score_added += score;
+	update_score();
+
+func update_score() -> void:
+	score_total = score_distance + score_added;
+	score_text.text = str(score_total);
+
+func set_score_text_state(disabled: bool) -> void:
+	score_text.modulate.a = score_text_alpha_disabled if disabled else score_text_alpha_enabled;
+	score_card_previous.visible = disabled;
+	score_card_best.visible = disabled;
+	score_text_previous.visible = disabled;
+	score_text_best.visible = disabled;
+
 # Background callables
 func update_background(delta: float) -> void:
 	var speed = tree_speed if not animate_trees_round_start else tree_animation_speed;
@@ -338,6 +414,9 @@ func set_playbutton_state(state: PlayButtonState) -> void:
 		PlayButtonState.Active:
 			pb_disabled = false;
 			pb_visible = true;
+
+	if pb_visible:
+		play_button.modulate.a = button_alpha_disabled if pb_disabled else button_alpha_enabled;
 
 	play_button.disabled = pb_disabled;
 	play_button.visible = pb_visible;
